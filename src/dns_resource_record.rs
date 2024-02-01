@@ -1,3 +1,5 @@
+use crate::utils::fqdn_to_vec;
+
 pub struct DNSResourceRecord {
     pub name: String,
     pub rtype: u16,
@@ -9,14 +11,7 @@ pub struct DNSResourceRecord {
 
 impl DNSResourceRecord {
     pub fn build(&self) -> Vec<u8> {
-        let mut buf: Vec<u8> = Vec::new();
-        for part in self.name.split('.') {
-            buf.push(part.len() as u8);
-            for c in part.chars() {
-                buf.push(c as u8);
-            }
-        }
-        buf.push(0);
+        let mut buf = fqdn_to_vec(&self.name);
         buf.push((self.rtype >> 8) as u8);
         buf.push(self.rtype as u8);
         buf.push((self.rclass >> 8) as u8);

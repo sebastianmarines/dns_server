@@ -1,6 +1,7 @@
 mod dns_header;
 mod dns_question;
 mod dns_resource_record;
+mod utils;
 use dns_resource_record::DNSResourceRecord;
 use std::net::UdpSocket;
 
