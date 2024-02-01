@@ -1,3 +1,12 @@
+#[non_exhaustive]
+pub struct RecordType;
+
+impl RecordType {
+    pub const A: u16 = 1;
+    pub const NS: u16 = 2;
+    pub const CNAME: u16 = 5;
+}
+
 pub fn fqdn_to_vec(fqdn: &str) -> Vec<u8> {
     let mut buf: Vec<u8> = Vec::new();
     for part in fqdn.split('.') {

@@ -4,6 +4,7 @@ mod dns_resource_record;
 mod utils;
 use dns_resource_record::DNSResourceRecord;
 use std::net::UdpSocket;
+use utils::RecordType;
 
 fn main() {
     let address = String::from("127.0.0.1");
@@ -24,12 +25,12 @@ fn main() {
         let mut records: Vec<dns_resource_record::DNSResourceRecord> = Vec::new();
         for question in &questions {
             let (response_type, response_length, response_data) = match question.qtype {
-                1 => (1, 4, vec![127, 0, 0, 1]),
-                2 => {
+                RecordType::A => (1, 4, vec![127, 0, 0, 1]),
+                RecordType::CNAME => {
                     let data = utils::fqdn_to_vec("ns1.example.com");
                     (2, data.len() as u16, data)
                 }
-                5 => {
+                RecordType::NS => {
                     let data = utils::fqdn_to_vec("cname.example.com");
                     (5, data.len() as u16, data)
                 }
