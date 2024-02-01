@@ -31,3 +31,28 @@ impl DNSResourceRecord {
         return buf;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_build_resource_record() {
+        let record = DNSResourceRecord {
+            name: String::from("facebook.com"),
+            rtype: 1,
+            rclass: 1,
+            ttl: 60,
+            rdlength: 4,
+            rdata: vec![127, 0, 0, 1],
+        };
+        let buf = record.build();
+        assert_eq!(
+            buf,
+            vec![
+                8, 102, 97, 99, 101, 98, 111, 111, 107, 3, 99, 111, 109, 0, 0, 1, 0, 1, 0, 0, 0,
+                60, 0, 4, 127, 0, 0, 1
+            ]
+        );
+    }
+}
