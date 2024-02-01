@@ -23,16 +23,27 @@ fn main() {
         // Create fake records
         let mut records: Vec<dns_resource_record::DNSResourceRecord> = Vec::new();
         for question in &questions {
-            if question.qtype == 1 && question.qclass == 1 {
-                records.push(DNSResourceRecord {
-                    name: question.qname.clone(),
-                    rtype: 1,
-                    rclass: 1,
-                    ttl: 60,
-                    rdlength: 4,
-                    rdata: vec![127, 0, 0, 1],
-                });
-            }
+            let (response_type, response_length, response_data) = match question.qtype {
+                1 => (1, 4, vec![127, 0, 0, 1]),
+                2 => {
+                    let data = utils::fqdn_to_vec("ns1.example.com");
+                    (2, data.len() as u16, data)
+                }
+                5 => {
+                    let data = utils::fqdn_to_vec("cname.example.com");
+                    (5, data.len() as u16, data)
+                }
+                _ => continue,
+            };
+
+            records.push(DNSResourceRecord {
+                name: question.qname.clone(),
+                rtype: response_type,
+                rclass: 1,
+                ttl: 60,
+                rdlength: response_length,
+                rdata: response_data,
+            });
         }
 
         header.ancount = 1;
