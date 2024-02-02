@@ -38,6 +38,7 @@ pub fn parse_questions(buf: &[u8], offset: usize, qdcount: u16) -> (Vec<DNSQuest
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::RecordType;
 
     #[test]
     fn test_parse_questions() {
@@ -48,7 +49,7 @@ mod tests {
         let (questions, _) = parse_questions(&buf, 0, 1);
         assert_eq!(questions.len(), 1);
         assert_eq!(questions[0].qname, "facebook.com");
-        assert_eq!(questions[0].qtype, 1);
+        assert_eq!(questions[0].qtype, RecordType::A);
         assert_eq!(questions[0].qclass, 1);
     }
 
@@ -56,7 +57,7 @@ mod tests {
     fn test_build_question() {
         let question = DNSQuestion {
             qname: String::from("facebook.com"),
-            qtype: 1,
+            qtype: RecordType::A,
             qclass: 1,
         };
         let buf = question.build();

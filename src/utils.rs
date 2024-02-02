@@ -85,7 +85,6 @@ pub fn query_ns(fqdn: &str) -> Result<Vec<u8>, String> {
     buf.extend(question_buf);
     for ns in root_nameservers {
         let socket = UdpSocket::bind("0.0.0.0:0").expect("Could not bind to address");
-        println!("Sending query to {}", ns);
         socket
             .connect(format!("{}:53", ns))
             .expect("Could not connect to nameserver");
@@ -123,10 +122,9 @@ mod tests {
     #[test]
     fn test_query_ns() {
         let response = query_ns("facebook.com").unwrap();
-        // Print the response
-        for byte in response {
-            print!("{:02x}", byte);
-        }
-        println!();
+        let response = crate::dns_response::parse_response(&response);
+        assert_eq!(response.answers.len(), 0);
+        assert_ne!(response.authorities.len(), 0);
+        assert_ne!(response.additionals.len(), 0);
     }
 }
