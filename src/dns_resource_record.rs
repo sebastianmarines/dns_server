@@ -94,7 +94,7 @@ mod tests {
         assert_eq!(records[0].name, "facebook.com");
         assert_eq!(records[0].rtype, 1);
         assert_eq!(records[0].rclass, 1);
-        // assert_eq!(records[0].ttl, 0);
+        assert_eq!(records[0].ttl, 60);
         assert_eq!(records[0].rdlength, 4);
         assert_eq!(records[0].rdata, vec![127, 0, 0, 1]);
     }
