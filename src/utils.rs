@@ -1,3 +1,9 @@
+use crate::dns_header::DNSHeader;
+use crate::dns_header::Flags;
+use crate::dns_question::DNSQuestion;
+use base64::{engine::general_purpose, Engine as _};
+use std::net::UdpSocket;
+
 #[non_exhaustive]
 pub struct RecordType;
 
@@ -19,9 +25,9 @@ pub fn fqdn_to_vec(fqdn: &str) -> Vec<u8> {
     return buf;
 }
 
-pub fn vec_to_fqdn(buf: &[u8]) -> (String, usize) {
+pub fn vec_to_fqdn(buf: &[u8], p: usize) -> (String, usize) {
     let mut fqdn = String::new();
-    let mut i = 0;
+    let mut i = p;
     loop {
         let len = buf[i] as usize;
         if len == 0 {
@@ -34,6 +40,54 @@ pub fn vec_to_fqdn(buf: &[u8]) -> (String, usize) {
         i += len + 1;
     }
     return (fqdn, i);
+}
+
+pub fn base64_to_vec(encoded_string: &str) -> Result<Vec<u8>, base64::DecodeError> {
+    general_purpose::STANDARD.decode(encoded_string.as_bytes())
+}
+
+// Recursive query to a nameserver
+pub fn query_ns(fqdn: &str) -> Result<Vec<u8>, String> {
+    let root_nameservers = vec![
+        "198.41.0.4",    // a.root-servers.net
+        "170.247.170.2", // b.root-servers.net
+    ];
+
+    // Create header
+    let header = DNSHeader {
+        id: 0,
+        flags: Flags::QUERY | Flags::RECURSION_DESIRED,
+        qdcount: 1,
+        ancount: 0,
+        nscount: 0,
+        arcount: 0,
+    };
+
+    let question = DNSQuestion {
+        qname: fqdn.parse().unwrap(),
+        qtype: RecordType::A,
+        qclass: 1,
+    };
+
+    let header_buf = header.build(None);
+    let question_buf = question.build();
+    let mut buf: Vec<u8> = Vec::new();
+    buf.extend(header_buf);
+    buf.extend(question_buf);
+    for ns in root_nameservers {
+        let socket = UdpSocket::bind("0.0.0.0:0").expect("Could not bind to address");
+        println!("Sending query to {}", ns);
+        socket
+            .connect(format!("{}:53", ns))
+            .expect("Could not connect to nameserver");
+        socket.send(&buf).expect("Could not send data");
+        let mut response_buf = [0; 1024];
+        let (_amt, _src) = socket
+            .recv_from(&mut response_buf)
+            .expect("Could not receive data");
+        return Ok(response_buf.to_vec());
+    }
+    return Ok(vec![0]);
 }
 
 #[cfg(test)]
@@ -53,7 +107,17 @@ mod tests {
     #[test]
     fn test_vec_to_fqdn() {
         let buf = vec![8, 102, 97, 99, 101, 98, 111, 111, 107, 3, 99, 111, 109, 0];
-        let (fqdn, _) = vec_to_fqdn(&buf);
+        let (fqdn, _) = vec_to_fqdn(&buf, 0);
         assert_eq!(fqdn, "facebook.com");
+    }
+
+    #[test]
+    fn test_query_ns() {
+        let response = query_ns("facebook.com").unwrap();
+        // Print the response
+        for byte in response {
+            print!("{:02x}", byte);
+        }
+        println!();
     }
 }

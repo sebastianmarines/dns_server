@@ -17,19 +17,19 @@ impl DNSQuestion {
     }
 }
 
-pub fn parse_questions(buf: &[u8], qdcount: u16) -> (Vec<DNSQuestion>, usize) {
+pub fn parse_questions(buf: &[u8], offset: usize, qdcount: u16) -> (Vec<DNSQuestion>, usize) {
     let mut questions: Vec<DNSQuestion> = Vec::new();
-    let mut i = 0;
+    let mut i = offset;
     for _ in 0..qdcount {
-        let (qname, new_i) = vec_to_fqdn(&buf[i..]);
+        let (qname, new_i) = vec_to_fqdn(&buf, i);
         i = new_i + 1;
         let qtype = ((buf[i] as u16) << 8) | buf[i + 1] as u16;
         let qclass = ((buf[i + 2] as u16) << 8) | buf[i + 3] as u16;
         i += 4;
         questions.push(DNSQuestion {
-            qname: qname,
-            qtype: qtype,
-            qclass: qclass,
+            qname,
+            qtype,
+            qclass,
         });
     }
     return (questions, i);
@@ -45,7 +45,7 @@ mod tests {
         let buf = vec![
             8, 102, 97, 99, 101, 98, 111, 111, 107, 3, 99, 111, 109, 0, 0, 1, 0, 1,
         ];
-        let (questions, _) = parse_questions(&buf, 1);
+        let (questions, _) = parse_questions(&buf, 0, 1);
         assert_eq!(questions.len(), 1);
         assert_eq!(questions[0].qname, "facebook.com");
         assert_eq!(questions[0].qtype, 1);

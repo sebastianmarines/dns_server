@@ -1,3 +1,28 @@
+#[non_exhaustive]
+pub struct Flags;
+
+#[allow(unused_imports)]
+#[allow(dead_code)]
+impl Flags {
+    pub const QUERY: u16 = 0x0000;
+    pub const RESPONSE: u16 = 0x8000;
+    pub const OP_QUERY: u16 = 0x0000;
+    pub const OP_INVERSE_QUERY: u16 = 0x0800;
+    pub const OP_STATUS: u16 = 0x1000;
+    pub const AUTHORITY: u16 = 0x0400;
+    pub const TRUNCATED: u16 = 0x0200;
+    pub const RECURSION_DESIRED: u16 = 0x0100;
+    pub const RECURSION_AVAILABLE: u16 = 0x0080;
+    pub const AUTHENTIC_DATA: u16 = 0x0020;
+    pub const CHECKING_DISABLED: u16 = 0x0010;
+    pub const NO_ERROR: u16 = 0x0000;
+    pub const FORMAT_ERROR: u16 = 0x0001;
+    pub const SERVER_FAILURE: u16 = 0x0002;
+    pub const NAME_ERROR: u16 = 0x0003;
+    pub const NOT_IMPLEMENTED: u16 = 0x0004;
+    pub const REFUSED: u16 = 0x0005;
+}
+
 pub struct DNSHeader {
     pub id: u16,
     pub flags: u16,

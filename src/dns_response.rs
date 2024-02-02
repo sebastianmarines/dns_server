@@ -11,11 +11,12 @@ pub struct DNSResponse {
 }
 
 pub fn parse_response(buf: &[u8]) -> DNSResponse {
-    let header = parse_header(&buf[..12]);
-    let (questions, offset) = parse_questions(&buf[12..], header.qdcount);
-    let (answers, offset) = parse_records(&buf[offset..], header.ancount);
-    let (authorities, offset) = parse_records(&buf[offset..], header.nscount);
-    let (additionals, _) = parse_records(&buf[offset..], header.arcount);
+    let header = parse_header(&buf);
+    let offset = 12;
+    let (questions, offset) = parse_questions(&buf, offset, header.qdcount);
+    let (answers, offset) = parse_records(&buf, offset, header.ancount);
+    let (authorities, offset) = parse_records(&buf, offset, header.nscount);
+    let (additionals, _) = parse_records(&buf, offset, header.arcount);
 
     return DNSResponse {
         header,

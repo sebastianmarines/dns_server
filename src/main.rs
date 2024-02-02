@@ -1,7 +1,9 @@
 mod dns_header;
 mod dns_question;
 mod dns_resource_record;
+mod dns_response;
 mod utils;
+
 use dns_resource_record::DNSResourceRecord;
 use std::net::UdpSocket;
 use utils::RecordType;
@@ -19,7 +21,8 @@ fn main() {
         let mut header = dns_header::parse_header(&buf[..12]);
 
         // Parse the DNS questions
-        let (questions, _) = dns_question::parse_questions(&buf[12..], header.qdcount);
+        let offset = 12;
+        let (questions, _) = dns_question::parse_questions(&buf, offset, header.qdcount);
 
         // Create fake records
         let mut records: Vec<dns_resource_record::DNSResourceRecord> = Vec::new();
