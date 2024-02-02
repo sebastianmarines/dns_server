@@ -30,6 +30,15 @@ pub fn vec_to_fqdn(buf: &[u8], p: usize) -> (String, usize) {
     let mut i = p;
     loop {
         let len = buf[i] as usize;
+        // Check if the first two bits are set, which means that the next 14 bits are an offset
+        if len & 0xc0 == 0xc0 {
+            let offset = (((len as u16) & 0x3f) << 8) | buf[i + 1] as u16;
+            let (new_fqdn, _) = vec_to_fqdn(buf, offset as usize);
+            fqdn.push_str(&new_fqdn);
+            // Since this is an offset, it doesn't end with a null byte, so we just increment the index by 1
+            i += 1;
+            break;
+        }
         if len == 0 {
             break;
         }

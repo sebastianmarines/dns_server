@@ -31,7 +31,7 @@ pub fn parse_records(buf: &[u8], offset: usize, n: u16) -> (Vec<DNSResourceRecor
     let mut records: Vec<DNSResourceRecord> = Vec::new();
     let mut i = offset;
     for _ in 0..n {
-        let (name, new_i) = vec_to_fqdn(&buf[i..], i);
+        let (name, new_i) = vec_to_fqdn(&buf, i);
         i = new_i + 1;
         let rtype = ((buf[i] as u16) << 8) | buf[i + 1] as u16;
         i += 2;
@@ -61,6 +61,7 @@ pub fn parse_records(buf: &[u8], offset: usize, n: u16) -> (Vec<DNSResourceRecor
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::base64_to_vec;
 
     #[test]
     fn test_build_resource_record() {
@@ -96,5 +97,17 @@ mod tests {
         // assert_eq!(records[0].ttl, 0);
         assert_eq!(records[0].rdlength, 4);
         assert_eq!(records[0].rdata, vec![127, 0, 0, 1]);
+    }
+
+    #[test]
+    fn test_parse_compressed() {
+        let buf = base64_to_vec("OOaBgAABAAEAAAAACGZhY2Vib29rA2NvbQAAAQABwAwAAQABAAAAJwAEnfAZIw==")
+            .unwrap();
+        let (records, _) = parse_records(&buf, 0x1E, 1);
+        assert_eq!(records.len(), 1);
+        assert_eq!(records[0].name, "facebook.com");
+        assert_eq!(records[0].rtype, 1);
+        assert_eq!(records[0].rclass, 1);
+        assert_eq!(records[0].ttl, 39);
     }
 }

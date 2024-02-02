@@ -50,7 +50,7 @@ mod tests {
 
     #[test]
     fn test_parse_compressed() {
-        let buf = base64_to_vec("OOaBgAABAAEAAAAACGZhY2Vib29rA2NvbQAAAQABwAwAIAABAAEAAAAnAASd8Bkj")
+        let buf = base64_to_vec("OOaBgAABAAEAAAAACGZhY2Vib29rA2NvbQAAAQABwAwAAQABAAAAJwAEnfAZIw==")
             .unwrap();
         let response = parse_response(&buf);
         assert_eq!(response.questions.len(), 1);
@@ -60,7 +60,7 @@ mod tests {
         assert_eq!(response.header.ancount, 1);
         assert_eq!(response.header.nscount, 0);
         assert_eq!(response.header.arcount, 0);
-        assert_eq!(response.answers.len(), 0);
+        assert_eq!(response.answers.len(), 1);
         assert_eq!(response.authorities.len(), 0);
         assert_eq!(response.additionals.len(), 0);
     }
